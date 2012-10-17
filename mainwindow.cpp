@@ -35,6 +35,9 @@ void MainWindow::on_pushButton_clicked()    //for the "Open" button
     ui->lineEdit->setText(fileName);
     IplImage *img;
     img=cvLoadImage(fileName.toStdString().c_str());
+    if (img==0) {
+        QMessageBox::critical(this, tr("Error"),tr("Could not load image"));
+    }
     int width=img->width;
     int height=img->height;
     int step=img->widthStep;
