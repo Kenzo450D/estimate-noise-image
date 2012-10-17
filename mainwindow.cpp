@@ -11,6 +11,7 @@
 #include <QFile>
 #include <QDebug>
 #include <cvaux.h>
+#include <QColor>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -112,10 +113,10 @@ void MainWindow::on_pushButton_4_clicked()  //for the "Estimate" Button
         columnIndex=clusters->data.i[i];
         rowPosition[columnIndex]++;
     }
-    qDebug() << "Lets see what the rowPosition array looks like : ";
-    for(i=0;i<cluster_count;i++) {
-        qDebug() << "Cluster : "<<i<<" the count is :"<<rowPosition[i];
-    }
+//    qDebug() << "Lets see what the rowPosition array looks like : ";
+//    for(i=0;i<cluster_count;i++) {
+//        qDebug() << "Cluster : "<<i<<" the count is :"<<rowPosition[i];
+//    }
     ui->progressBar->setValue(40);
     qDebug() << "40% - array indexed, and ready to find maximum";
     //________________________________________________________finding maximum of the rowPosition array
@@ -230,6 +231,7 @@ void MainWindow::on_pushButton_4_clicked()  //for the "Estimate" Button
     //__________________________________________________________calculating weighted mean, and weighted std
     QString info="";
     float weightedMean=0.0f, weightedStd=0.0f;
+    float datasd[3];
     for(j=0;j<points->cols;j++) {
         meanStorePtr=(float*) meanStore->data.ptr;
         stdStorePtr=(float*) stdStore->data.ptr;
@@ -256,13 +258,52 @@ void MainWindow::on_pushButton_4_clicked()  //for the "Estimate" Button
         info.append(QString::number(weightedMean));
         info.append("\nWeighted Standard Deviation: ");
         info.append(QString::number(weightedStd));
+        datasd[j]=weightedStd;
     }
     ui->textEdit->setText(info);
     ui->progressBar->setValue(90);
+    //________________________________________________________adaptation
+    float L, LSoft, Cr, CrSoft, Cb, CbSoft;
+    LSoft=CrSoft=CbSoft=0.6;
+    if(datasd[0]<7)
+        L=datasd[0]-0.98;
+    if(datasd[0]>=7 && datasd[0]<8)
+        L=datasd[0]-1.2;
+    if(datasd[0]>=8 && datasd[0]<9)
+        L=datasd[0]-1.5;
+    else
+        L=datasd[0]-1.7;
+    if(L<0)
+        L=0;
+    if(L>9)
+        L=9;
+    Cr=datasd[1]/2;
+    Cb=datasd[1]/2;
+    if(Cr>7)
+        Cr=7;
+    if(Cb>7)
+        Cb=7;
+    L=floorf(L * 100) / 100;
+    Cb=floorf(Cb * 100) / 100;
+    Cr=floorf(Cr * 100) / 100;
+    QString mainOutput;
+    mainOutput.append("\nL          :");
+    mainOutput.append(QString::number(L));
+    mainOutput.append("\nL Softness : ");
+    mainOutput.append(QString::number(LSoft));
+    mainOutput.append("\nCr         :");
+    mainOutput.append(QString::number(Cr));
+    mainOutput.append("\nCr Softness: ");
+    mainOutput.append(QString::number(CrSoft));
+    mainOutput.append("\nCb         :");
+    mainOutput.append(QString::number(Cb));
+    mainOutput.append("\nCb Softness:");
+    mainOutput.append(QString::number(CbSoft));
 
-
-
-
+    qDebug() << "L= "<<L<<"\nL Softness= "<<LSoft<<"\nCr= "<<Cr<<"\nCr Softness="<<CrSoft<<"\nCb= "<<Cb<<"\nCb Softness="<<CbSoft;
+    ui->progressBar->setValue(100);
+    ui->textEdit->setText(mainOutput);
+    ui->textEdit->setTextBackgroundColor(QColor(1,1,0));
 
     //________________________________________________________releasing matrices and closing files
     cvReleaseMat(&sd);
