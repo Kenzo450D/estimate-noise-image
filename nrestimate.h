@@ -22,36 +22,41 @@
  *
  * ============================================================ */
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef NRESTIMATE_H
+#define NRESTIMATE_H
 
-#include <QMainWindow>
+// Qt includes
 
-namespace Ui
+#include <QObject>
+#include <QString>
+
+class NREstimate : public QObject
 {
-    class MainWindow;
-}
+Q_OBJECT
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
-    
 public:
 
-    explicit MainWindow(QWidget* const parent = 0);
-    ~MainWindow();
-    
-private Q_SLOTS:
+    explicit NREstimate(QObject* const parent);
+    ~NREstimate();
 
-    void on_pushButton_clicked();
-    void on_pushButton_2_clicked();
-    void on_pushButton_4_clicked();
+    void setImagePath(const QString& path);
 
-    void slotProgress(int);
+    void estimateNoise();
+
+    QString output() const;
+
+Q_SIGNALS:
+
+    void signalProgress(int);
 
 private:
 
-    Ui::MainWindow *ui;
+    void postProgress(int, const QString&);
+
+private:
+
+    class Private;
+    Private* const d;
 };
 
-#endif // MAINWINDOW_H
+#endif /* NRESTIMATE_H */

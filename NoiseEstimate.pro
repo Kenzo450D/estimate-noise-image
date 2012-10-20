@@ -10,10 +10,9 @@ TARGET = NoiseEstimate
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp
+SOURCES += main.cpp mainwindow.cpp nrestimate.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h nrestimate.h
 
 FORMS    += mainwindow.ui
 
